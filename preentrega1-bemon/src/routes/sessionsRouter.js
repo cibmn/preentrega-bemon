@@ -49,36 +49,33 @@ router.post('/login', (req, res, next) => {
   })(req, res, next);
 });
 
+// Ruta protegida, usa la estrategia 'jwt'
 router.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
   const { password, __v, ...safeUser } = req.user.toObject();
-
   res.send({
     status: 'success',
     user: safeUser,
   });
 });
 
-// Logout con sesión
-router.post('/logout', async (req, res) => {
-  try {
-    await req.logout();
+router.post('/logout', (req, res, next) => {
+  req.logout(err => {
+    if (err) return next(err);
     req.session?.destroy(err => {
       if (err) return res.status(500).send({ status: 'error', message: 'Error al cerrar sesión' });
       res.send({ status: 'success', message: 'Sesión cerrada' });
     });
-  } catch (err) {
-    res.status(500).send({ status: 'error', message: 'Error al cerrar sesión' });
-  }
+  });
 });
 
+// Ruta para testear token
 router.get('/token-test', (req, res) => {
   const token = jwt.sign(
     { id: 'test-id', email: 'test@example.com', role: 'tester' },
     process.env.JWT_SECRET || 'secret_jwt_key',
     { expiresIn: '1h' }
   );
-
-  const data = {
+  res.send({
     status: 'success',
     message: 'Ruta de prueba del token',
     token,
@@ -87,10 +84,7 @@ router.get('/token-test', (req, res) => {
       email: 'test@example.com',
       role: 'tester'
     }
-  };
-
-
-  res.send(data); 
+  });
 });
 
 export default router;

@@ -1,7 +1,9 @@
 import { Router } from 'express';
+import passport from 'passport';
 import { productDBManager } from '../dao/productDBManager.js';
 import { cartDBManager } from '../dao/cartDBManager.js';
 import { isAuth } from '../middlewares/auth.js';
+import { currentUserDTO } from '../middlewares/currentDTO.js';
 
 const router = Router();
 const ProductService = new productDBManager();
@@ -25,7 +27,7 @@ router.get('/products', async (req, res) => {
                 link: products.nextLink
             }
         }
-    )
+    );
 });
 
 router.get('/realtimeproducts', async (req, res) => {
@@ -37,10 +39,13 @@ router.get('/realtimeproducts', async (req, res) => {
             style: 'index.css',
             products: JSON.parse(JSON.stringify(products.docs))
         }
-    )
+    );
 });
 
-// Protegemos esta ruta con isAuth
+
+
+
+
 router.get('/cart/:cid', isAuth, async (req, res) => {
     const response = await CartService.getProductsFromCartByID(req.params.cid);
 
@@ -61,7 +66,16 @@ router.get('/cart/:cid', isAuth, async (req, res) => {
             style: 'index.css',
             products: JSON.parse(JSON.stringify(response.products))
         }
-    )
+    );
 });
+
+router.get(
+  '/current',
+  passport.authenticate('current', { session: false }),
+  (req, res) => {
+    const userDTO = currentUserDTO(req.user);
+    res.json({ status: 'success', payload: userDTO });
+  }
+);
 
 export default router;
