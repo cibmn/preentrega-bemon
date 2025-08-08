@@ -39,6 +39,7 @@ router.post('/mycart', jwtAuth, async (req, res) => {
 router.post('/:cid/product/:pid', jwtAuth, async (req, res) => {
   try {
     const { cid, pid } = req.params;
+    const { quantity } = req.body;  // <-- Aquí la cantidad enviada
     const userId = req.user._id || req.user.id;
 
     const cart = await CartService.getCartByUserId(userId);
@@ -46,12 +47,13 @@ router.post('/:cid/product/:pid', jwtAuth, async (req, res) => {
       return res.status(403).send({ status: 'error', message: 'No autorizado para modificar este carrito' });
     }
 
-    const updatedCart = await CartService.addProductByID(cid, pid);
+    const updatedCart = await CartService.addProductByID(cid, pid, quantity || 1);
     res.send({ status: 'success', payload: updatedCart });
   } catch (error) {
     res.status(400).send({ status: 'error', message: error.message });
   }
 });
+
 
 // Eliminar producto del carrito
 router.delete('/:cid/product/:pid', jwtAuth, async (req, res) => {

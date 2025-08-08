@@ -6,7 +6,7 @@ class cartDBManager {
     this.carts = [];
   }
 
-  async getCartByUserId(userId) {  // cambié a "Id" para que coincida con el router
+  async getCartByUserId(userId) {
     return this.carts.find(cart => cart.userId === userId) || null;
   }
 
@@ -16,14 +16,29 @@ class cartDBManager {
     return newCart;
   }
 
-  async addProductByID(cartId, productId) {
+  async addProductByID(cartId, productId, quantity = 1) {
     const cart = this.carts.find(c => c.id === cartId);
     if (!cart) throw new Error('Carrito no encontrado');
 
-    const product = await this.productService.getProductByID(productId);  // CORRECCIÓN
+    const product = await this.productService.getProductByID(productId);
     if (!product) throw new Error('Producto no encontrado');
 
-    cart.products.push({ productId, quantity: 1 });
+    if (quantity < 1) throw new Error('La cantidad debe ser al menos 1');
+
+    const productInCart = cart.products.find(p => p.productId === productId);
+
+    if (productInCart) {
+      // Sumar cantidad verificando stock
+      if (productInCart.quantity + quantity > product.stock) {
+        throw new Error('No hay suficiente stock disponible');
+      }
+      productInCart.quantity += quantity;
+    } else {
+      if (quantity > product.stock) {
+        throw new Error('No hay suficiente stock disponible');
+      }
+      cart.products.push({ productId, quantity });
+    }
     return cart;
   }
 
@@ -44,8 +59,19 @@ class cartDBManager {
   async updateProductByID(cartId, productId, quantity) {
     const cart = this.carts.find(c => c.id === cartId);
     if (!cart) throw new Error('Carrito no encontrado');
+
     const productInCart = cart.products.find(p => p.productId === productId);
     if (!productInCart) throw new Error('Producto no encontrado en carrito');
+
+    if (quantity < 1) throw new Error('La cantidad debe ser al menos 1');
+
+    const product = await this.productService.getProductByID(productId);
+    if (!product) throw new Error('Producto no encontrado');
+
+    if (quantity > product.stock) {
+      throw new Error('No hay suficiente stock disponible');
+    }
+
     productInCart.quantity = quantity;
     return cart;
   }
