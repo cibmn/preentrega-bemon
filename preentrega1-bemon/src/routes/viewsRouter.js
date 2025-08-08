@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import passport from 'passport';
 import { productDBManager } from '../dao/productDBManager.js';
-import { cartDBManager } from '../dao/cartDBManager.js';
+import  cartDBManager  from '../dao/cartDBManager.js';
 import { isAuth } from '../middlewares/auth.js';
 import { currentUserDTO } from '../middlewares/currentDTO.js';
 

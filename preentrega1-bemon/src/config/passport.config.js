@@ -1,7 +1,7 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import UserModel from '../dao/models/userModel.js';
+import UserModel from '../models/userModel.js';
 import { createHash, isValidPassword } from '../utils/hashUtil.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_jwt_key';

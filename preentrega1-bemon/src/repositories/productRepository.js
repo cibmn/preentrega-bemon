@@ -1,4 +1,4 @@
-import productModel from '../dao/models/productModel.js';
+import productModel from '../models/productModel.js';
 
 class ProductRepository {
   async getAll(filter = {}, options = {}) {

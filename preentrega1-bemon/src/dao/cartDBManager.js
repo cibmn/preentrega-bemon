@@ -1,115 +1,54 @@
-import { cartModel } from "./models/cartModel.js";
+import { productDBManager } from './productDBManager.js';
 
 class cartDBManager {
-  constructor(productDBManager) {
-    this.productDBManager = productDBManager;
+  constructor(productService) {
+    this.productService = productService;
+    this.carts = [];
   }
 
-  async getAllCarts() {
-    return cartModel.find();
+  async getCartByUserId(userId) {  // cambié a "Id" para que coincida con el router
+    return this.carts.find(cart => cart.userId === userId) || null;
   }
 
-  // Obtener carrito por id para admins
-  async getProductsFromCartByID(cid) {
-    const cart = await cartModel.findOne({ _id: cid }).populate('products.product');
-    if (!cart) throw new Error(`El carrito ${cid} no existe!`);
-    return cart;
-  }
-
-  // Obtener carrito por usuario (usuario logueado)
-  async getCartByUserId(userId) {
-    const cart = await cartModel.findOne({ user: userId }).populate('products.product');
-    // Aquí ya no lanza error si no existe, solo devuelve null
-    return cart;
-  }
-
-  // Crear carrito para usuario (previene duplicados)
   async createCart(userId) {
-    const existingCart = await cartModel.findOne({ user: userId });
-    if (existingCart) return existingCart;
-    return await cartModel.create({ user: userId, products: [] });
+    const newCart = { id: String(Date.now()), userId, products: [] };
+    this.carts.push(newCart);
+    return newCart;
   }
 
-  // Añadir producto al carrito
-  async addProductByID(cid, pid) {
-    await this.productDBManager.getProductByID(pid);
+  async addProductByID(cartId, productId) {
+    const cart = this.carts.find(c => c.id === cartId);
+    if (!cart) throw new Error('Carrito no encontrado');
 
-    const cart = await cartModel.findOne({ _id: cid });
-    if (!cart) throw new Error(`El carrito ${cid} no existe!`);
+    const product = await this.productService.getProductByID(productId);  // CORRECCIÓN
+    if (!product) throw new Error('Producto no encontrado');
 
-    let i = null;
-    const result = cart.products.filter((item, index) => {
-      if (item.product.toString() === pid) i = index;
-      return item.product.toString() === pid;
-    });
-
-    if (result.length > 0) {
-      cart.products[i].quantity += 1;
-    } else {
-      cart.products.push({
-        product: pid,
-        quantity: 1
-      });
-    }
-    await cartModel.updateOne({ _id: cid }, { products: cart.products });
-
-    return await this.getProductsFromCartByID(cid);
+    cart.products.push({ productId, quantity: 1 });
+    return cart;
   }
 
-  // Borrar producto del carrito
-  async deleteProductByID(cid, pid) {
-    await this.productDBManager.getProductByID(pid);
-
-    const cart = await cartModel.findOne({ _id: cid });
-    if (!cart) throw new Error(`El carrito ${cid} no existe!`);
-
-    const newProducts = cart.products.filter(item => item.product.toString() !== pid);
-
-    await cartModel.updateOne({ _id: cid }, { products: newProducts });
-
-    return await this.getProductsFromCartByID(cid);
+  async deleteProductByID(cartId, productId) {
+    const cart = this.carts.find(c => c.id === cartId);
+    if (!cart) throw new Error('Carrito no encontrado');
+    cart.products = cart.products.filter(p => p.productId !== productId);
+    return cart;
   }
 
-  // Actualizar todos los productos del carrito
-  async updateAllProducts(cid, products) {
-    for (let key in products) {
-      await this.productDBManager.getProductByID(products[key].product);
-    }
-
-    await cartModel.updateOne({ _id: cid }, { products: products });
-
-    return await this.getProductsFromCartByID(cid);
+  async deleteAllProducts(cartId) {
+    const cart = this.carts.find(c => c.id === cartId);
+    if (!cart) throw new Error('Carrito no encontrado');
+    cart.products = [];
+    return cart;
   }
 
-  // Actualizar cantidad de producto en carrito
-  async updateProductByID(cid, pid, quantity) {
-    if (!quantity || isNaN(parseInt(quantity))) throw new Error(`La cantidad ingresada no es válida!`);
-
-    await this.productDBManager.getProductByID(pid);
-
-    const cart = await cartModel.findOne({ _id: cid });
-    if (!cart) throw new Error(`El carrito ${cid} no existe!`);
-
-    let i = null;
-    const result = cart.products.filter((item, index) => {
-      if (item.product.toString() === pid) i = index;
-      return item.product.toString() === pid;
-    });
-
-    if (result.length === 0) throw new Error(`El producto ${pid} no existe en el carrito ${cid}!`);
-
-    cart.products[i].quantity = parseInt(quantity);
-
-    await cartModel.updateOne({ _id: cid }, { products: cart.products });
-
-    return await this.getProductsFromCartByID(cid);
-  }
-
-  // Vaciar carrito
-  async deleteAllProducts(cid) {
-    await cartModel.updateOne({ _id: cid }, { products: [] });
-    return await this.getProductsFromCartByID(cid);
+  async updateProductByID(cartId, productId, quantity) {
+    const cart = this.carts.find(c => c.id === cartId);
+    if (!cart) throw new Error('Carrito no encontrado');
+    const productInCart = cart.products.find(p => p.productId === productId);
+    if (!productInCart) throw new Error('Producto no encontrado en carrito');
+    productInCart.quantity = quantity;
+    return cart;
   }
 }
 
-export { cartDBManager };
+export default cartDBManager;

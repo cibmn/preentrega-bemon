@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ticketDBManager } from '../dao/ticketDBManager.js';
-import { cartDBManager } from '../dao/cartDBManager.js'; // asumimos que existe
+import  cartDBManager from '../dao/cartDBManager.js'; // asumimos que existe
 import { productDBManager } from '../dao/productDBManager.js';
 import { isAuth } from '../middlewares/auth.js';
 

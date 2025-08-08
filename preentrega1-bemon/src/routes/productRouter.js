@@ -1,15 +1,17 @@
 import { Router } from 'express';
-import ProductService from '../services/productService.js';
+import { productDBManager } from '../dao/productDBManager.js';
+import { jwtAuth } from '../middlewares/jwtAuth.js';
+import { authorizeRole } from '../middlewares/auth.js';
 import { uploader } from '../utils/multerUtil.js';
-import { isAuth, isAdmin } from '../middlewares/auth.js';
 
 const router = Router();
-const productService = new ProductService();
+const productService = new productDBManager();
 
 router.get('/', async (req, res) => {
   try {
-    const result = await productService.getAllProducts(req.query);
-    res.send({ status: 'success', payload: result });
+    // Pasamos req.query para paginación, límite y orden
+    const products = await productService.getAllProducts(req.query);
+    res.send({ status: 'success', payload: products });
   } catch (error) {
     res.status(500).send({ status: 'error', message: error.message });
   }
@@ -24,19 +26,19 @@ router.get('/:pid', async (req, res) => {
   }
 });
 
-router.post('/', isAuth, isAdmin, uploader.array('thumbnails', 3), async (req, res) => {
+router.post('/', jwtAuth, authorizeRole('admin'), uploader.array('thumbnails', 3), async (req, res) => {
   if (req.files) {
     req.body.thumbnails = req.files.map(file => file.path);
   }
   try {
-    const product = await productService.createProduct(req.body);
-    res.status(201).send({ status: 'success', payload: product });
+    const newProduct = await productService.createProduct(req.body);
+    res.status(201).send({ status: 'success', payload: newProduct });
   } catch (error) {
     res.status(400).send({ status: 'error', message: error.message });
   }
 });
 
-router.put('/:pid', isAuth, isAdmin, uploader.array('thumbnails', 3), async (req, res) => {
+router.put('/:pid', jwtAuth, authorizeRole('admin'), uploader.array('thumbnails', 3), async (req, res) => {
   if (req.files) {
     req.body.thumbnails = req.files.map(file => file.path);
   }
@@ -48,10 +50,10 @@ router.put('/:pid', isAuth, isAdmin, uploader.array('thumbnails', 3), async (req
   }
 });
 
-router.delete('/:pid', isAuth, isAdmin, async (req, res) => {
+router.delete('/:pid', jwtAuth, authorizeRole('admin'), async (req, res) => {
   try {
-    const deletedProduct = await productService.deleteProduct(req.params.pid);
-    res.send({ status: 'success', payload: deletedProduct });
+    await productService.deleteProduct(req.params.pid);
+    res.send({ status: 'success', message: `Producto ${req.params.pid} eliminado` });
   } catch (error) {
     res.status(400).send({ status: 'error', message: error.message });
   }

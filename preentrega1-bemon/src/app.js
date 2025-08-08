@@ -54,7 +54,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// Rutas públicas
 app.use('/api/products', productRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/', viewsRouter);
