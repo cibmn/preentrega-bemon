@@ -1,24 +1,32 @@
 import { Router } from 'express';
 import cartDBManager from '../dao/cartDBManager.js';
-import { productDBManager } from '../dao/productDBManager.js'; // Import default sin llaves
+import { productDBManager } from '../dao/productDBManager.js';
 import { jwtAuth } from '../middlewares/jwtAuth.js';
+import UserDTO from '../dtos/UserDTO.js';
+import CartDTO from '../dtos/CartDTO.js';
+import { currentUserDTO } from '../dtos/currentDTO.js';  // si usás esta versión
 
 const router = Router();
 const ProductService = new productDBManager();
 const CartService = new cartDBManager(ProductService);
 
-// Obtener carrito del usuario autenticado, crea uno si no existe
+// Aquí va el endpoint /current con los DTOs
 router.get('/current', jwtAuth, async (req, res) => {
   try {
     const userId = req.user._id || req.user.id;
-    if (!userId) return res.status(400).send({ status: 'error', message: 'ID de usuario no encontrado en token' });
+    if (!userId)
+      return res.status(400).send({ status: 'error', message: 'ID de usuario no encontrado en token' });
 
     let cart = await CartService.getCartByUserId(userId);
     if (!cart) {
       cart = await CartService.createCart(userId);
     }
 
-    res.send({ status: 'success', payload: cart });
+    // Usando los DTOs para filtrar la info que devuelvo
+    const userDto = new UserDTO(req.user);
+    const cartDto = new CartDTO(cart);
+
+    res.send({ status: 'success', payload: { user: userDto, cart: cartDto } });
   } catch (error) {
     res.status(500).send({ status: 'error', message: error.message });
   }
