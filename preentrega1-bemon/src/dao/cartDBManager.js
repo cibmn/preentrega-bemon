@@ -28,7 +28,6 @@ class cartDBManager {
     const productInCart = cart.products.find(p => p.productId === productId);
 
     if (productInCart) {
-      // Sumar cantidad verificando stock
       if (productInCart.quantity + quantity > product.stock) {
         throw new Error('No hay suficiente stock disponible');
       }
@@ -55,6 +54,26 @@ class cartDBManager {
     cart.products = [];
     return cart;
   }
+
+async removeProductQuantity(cartId, productId, quantity) {
+  const cart = this.carts.find(c => c.id === cartId);
+  if (!cart) throw new Error('Carrito no encontrado');
+
+  const productInCart = cart.products.find(p => p.productId === productId);
+  if (!productInCart) throw new Error('Producto no encontrado en carrito');
+
+  if (quantity < 1) throw new Error('La cantidad debe ser al menos 1');
+
+  productInCart.quantity -= quantity;
+
+  if (productInCart.quantity <= 0) {
+    // eliminar producto del carrito
+    cart.products = cart.products.filter(p => p.productId !== productId);
+  }
+
+  return cart;
+}
+
 
   async updateProductByID(cartId, productId, quantity) {
     const cart = this.carts.find(c => c.id === cartId);

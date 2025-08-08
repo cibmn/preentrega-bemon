@@ -73,6 +73,30 @@ router.delete('/:cid/product/:pid', jwtAuth, async (req, res) => {
   }
 });
 
+// Disminuir cantidad de un producto en el carrito
+router.patch('/:cid/product/:pid', jwtAuth, async (req, res) => {
+  try {
+    const { cid, pid } = req.params;
+    const { quantity } = req.body;
+    const userId = req.user._id || req.user.id;
+
+    if (!quantity || quantity < 1) {
+      return res.status(400).send({ status: 'error', message: 'Cantidad inválida' });
+    }
+
+    const cart = await CartService.getCartByUserId(userId);
+    if (!cart || cart.id !== cid) {
+      return res.status(403).send({ status: 'error', message: 'No autorizado para modificar este carrito' });
+    }
+
+    const updatedCart = await CartService.removeProductQuantity(cid, pid, quantity);
+    res.send({ status: 'success', payload: updatedCart });
+  } catch (error) {
+    res.status(400).send({ status: 'error', message: error.message });
+  }
+});
+
+
 // Vaciar carrito completo
 router.delete('/:cid', jwtAuth, async (req, res) => {
   try {
