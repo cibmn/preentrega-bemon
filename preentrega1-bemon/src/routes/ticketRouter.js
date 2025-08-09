@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ticketDBManager } from '../dao/ticketDBManager.js';
-import  cartDBManager from '../dao/cartDBManager.js'; // asumimos que existe
+import  cartDBManager from '../dao/cartDBManager.js'; 
 import { productDBManager } from '../dao/productDBManager.js';
 import { isAuth } from '../middlewares/auth.js';
 
@@ -18,7 +18,6 @@ router.post('/purchase/:cid', isAuth, async (req, res) => {
     let totalAmount = 0;
     let outOfStock = [];
 
-    // Verifica stock y calcula monto total
     for (const item of cart.products) {
       const product = await ProductService.getProductByID(item.product._id.toString());
 
@@ -41,14 +40,12 @@ router.post('/purchase/:cid', isAuth, async (req, res) => {
       });
     }
 
-    // Actualiza productos
     for (const item of cart.products) {
       const product = await ProductService.getProductByID(item.product._id.toString());
       product.stock -= item.quantity;
       await ProductService.updateProduct(product._id, { stock: product.stock });
     }
 
-    // Crea ticket
     const ticketData = {
       code: 'TICKET-' + Date.now(),
       buyer: req.user._id,
@@ -58,7 +55,6 @@ router.post('/purchase/:cid', isAuth, async (req, res) => {
 
     const ticket = await TicketService.createTicket(ticketData);
 
-    // se limpia carrito después de compra
     await CartService.deleteAllProducts(req.params.cid);
 
     res.send({

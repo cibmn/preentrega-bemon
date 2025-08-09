@@ -56,6 +56,7 @@ class cartDBManager {
     return cart;
   }
 
+
   async removeProductQuantity(cartId, productId, quantity) {
     const cart = this.carts.find(c => c.id === cartId);
     if (!cart) throw new Error('Carrito no encontrado');
@@ -65,15 +66,17 @@ class cartDBManager {
 
     if (quantity < 1) throw new Error('La cantidad debe ser al menos 1');
 
+
     productInCart.quantity -= quantity;
 
+
     if (productInCart.quantity <= 0) {
-      // eliminar producto del carrito
       cart.products = cart.products.filter(p => p.productId !== productId);
     }
 
     return cart;
   }
+
 
   async updateProductByID(cartId, productId, quantity) {
     const cart = this.carts.find(c => c.id === cartId);

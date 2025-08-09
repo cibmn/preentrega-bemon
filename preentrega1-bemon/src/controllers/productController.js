@@ -1,7 +1,7 @@
 import { productDBManager } from '../dao/productDBManager.js';
 const ProductService = new productDBManager();
 
-// Crear un producto
+
 const createProduct = async (req, res) => {
   try {
     const newProduct = await ProductService.createProduct(req.body);
@@ -11,7 +11,7 @@ const createProduct = async (req, res) => {
   }
 };
 
-// Actualizar un producto
+
 const updateProduct = async (req, res) => {
   try {
     const updatedProduct = await ProductService.updateProduct(req.params.id, req.body);
@@ -21,7 +21,8 @@ const updateProduct = async (req, res) => {
   }
 };
 
-// Eliminar un producto
+
+
 const deleteProduct = async (req, res) => {
   try {
     await ProductService.deleteProduct(req.params.id);
@@ -31,7 +32,10 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-// Listar productos
+
+
+
+
 const listProducts = async (req, res) => {
   try {
     const products = await ProductService.getAllProducts(req.query);

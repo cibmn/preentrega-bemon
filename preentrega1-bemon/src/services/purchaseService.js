@@ -16,26 +16,22 @@ class PurchaseService {
       throw new Error('Carrito no encontrado o no pertenece al usuario');
     }
 
-    // Verificar stock de los productos en el carrito
     const updatedProducts = [];
     let totalAmount = 0;
 
     for (let cartItem of cart.products) {
-      const product = await this.productService.getProductByID(cartItem.product);  // Corregir el método a getProductByID
+      const product = await this.productService.getProductByID(cartItem.product);  
       if (!product) {
         throw new Error(`Producto con ID ${cartItem.product} no encontrado`);
       }
 
-      // Verificar si hay suficiente stock
       if (product.stock < cartItem.quantity) {
         throw new Error(`Stock insuficiente para el producto: ${product.name}`);
       }
 
-      // Reducir el stock
       product.stock -= cartItem.quantity;
-      await this.productService.updateProduct(product._id, { stock: product.stock });  // Usar _id para actualizar el producto
+      await this.productService.updateProduct(product._id, { stock: product.stock });  
 
-      // Calcular el total
       totalAmount += product.price * cartItem.quantity;
 
       updatedProducts.push({
@@ -45,9 +41,8 @@ class PurchaseService {
       });
     }
 
-    // Crear el ticket
     const ticketData = {
-      code: `TICKET-${new Date().getTime()}`,  // Generar un código único para el ticket
+      code: `TICKET-${new Date().getTime()}`, 
       amount: totalAmount,
       buyer: userId,
       products: updatedProducts,
@@ -55,7 +50,6 @@ class PurchaseService {
 
     const ticket = await ticketModel.create(ticketData);
 
-    // Limpiar el carrito
     await this.cartService.deleteAllProducts(cartId);
 
     return ticket;

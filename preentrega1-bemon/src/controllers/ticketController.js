@@ -1,4 +1,3 @@
-// controllers/ticketController.js
 import Ticket from '../models/ticketModel.js';
 import { productDBManager } from '../dao/productDBManager.js';
 import cartDBManager from '../dao/cartDBManager.js';

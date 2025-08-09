@@ -6,7 +6,6 @@ class ProductService {
   }
 
   async getAllProducts(query) {
-    // Aquí podrías parsear query params (paginación, filtros, orden)
     const filter = {};
     const options = {
       page: query.page || 1,

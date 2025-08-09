@@ -3,7 +3,7 @@ import productModel from "../models/productModel.js";
 
 class productDBManager {
 
-  // Obtener todos los productos con paginación y ordenación
+
   async getAllProducts(params) {
     const paginate = {
       page: params.page ? parseInt(params.page) : 1,
@@ -14,7 +14,7 @@ class productDBManager {
 
     const products = await productModel.paginate({}, paginate);
 
-    // Verificar si no hay productos
+
     if (!products.docs.length) {
       throw new Error('No se encontraron productos');
     }
@@ -45,38 +45,35 @@ class productDBManager {
     return product;
   }
 
-  // Crear un nuevo producto
+
   async createProduct(product) {
     const { title, description, code, price, stock, category, thumbnails } = product;
 
-    // Verificar que todos los campos sean válidos
+
     if (!title || !description || !code || !price || !stock || !category) {
       throw new Error('Error al crear el producto');
     }
 
-    // Verificar si ya existe un producto con el mismo código
+
     const existingProduct = await productModel.findOne({ code });
     if (existingProduct) throw new Error('El código de producto ya existe');
 
     return await productModel.create({ title, description, code, price, stock, category, thumbnails });
   }
 
-  // Actualizar un producto por su ID
+
   async updateProduct(pid, productUpdate) {
     const product = await this.getProductByID(pid);
 
-    // Realizar la actualización
+
     return await productModel.updateOne({ _id: pid }, productUpdate);
   }
 
-  // Eliminar un producto por su ID
   async deleteProduct(pid) {
-    // Verificar si el producto existe
     const product = await this.getProductByID(pid);
 
     const result = await productModel.deleteOne({ _id: pid });
 
-    // Retornar un mensaje de éxito
     return { message: `Producto con ID ${pid} eliminado exitosamente` };
   }
 }

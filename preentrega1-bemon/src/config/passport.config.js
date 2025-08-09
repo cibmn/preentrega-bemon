@@ -6,7 +6,8 @@ import { createHash, isValidPassword } from '../utils/hashUtil.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_jwt_key';
 
-// Estrategia para registro
+
+
 passport.use('register', new LocalStrategy(
   { usernameField: 'email', passReqToCallback: true },
   async (req, email, password, done) => {
@@ -26,7 +27,10 @@ passport.use('register', new LocalStrategy(
   }
 ));
 
-// Estrategia para login
+
+
+
+
 passport.use('login', new LocalStrategy(
   { usernameField: 'email' },
   async (email, password, done) => {
@@ -42,7 +46,6 @@ passport.use('login', new LocalStrategy(
   }
 ));
 
-// Estrategia JWT (nótese que la nombramos 'jwt' para seguir el estándar)
 passport.use('jwt', new JwtStrategy({
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: JWT_SECRET,

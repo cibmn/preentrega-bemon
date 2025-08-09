@@ -4,7 +4,7 @@ import { productDBManager } from "../dao/productDBManager.js";
 const CartService = new cartDBManager(productDBManager);
 const ProductService = new productDBManager();
 
-// Crear un nuevo carrito
+
 const createCart = async (req, res) => {
   try {
     const newCart = await CartService.createCart(req.user._id);
@@ -14,7 +14,9 @@ const createCart = async (req, res) => {
   }
 };
 
-// Añadir un producto al carrito
+
+
+
 const addProductToCart = async (req, res) => {
   const { cartId } = req.params;
   const { productId, quantity } = req.body;
@@ -27,7 +29,7 @@ const addProductToCart = async (req, res) => {
   }
 };
 
-// Actualizar la cantidad de un producto en el carrito
+
 const updateProductQuantity = async (req, res) => {
   const { cartId, productId } = req.params;
   const { quantity } = req.body;
@@ -40,7 +42,8 @@ const updateProductQuantity = async (req, res) => {
   }
 };
 
-// Eliminar un producto del carrito
+
+
 const removeProductFromCart = async (req, res) => {
   const { cartId, productId } = req.params;
   
@@ -52,7 +55,6 @@ const removeProductFromCart = async (req, res) => {
   }
 };
 
-// Vaciar el carrito
 const clearCart = async (req, res) => {
   const { cartId } = req.params;
   
@@ -64,7 +66,6 @@ const clearCart = async (req, res) => {
   }
 };
 
-// Ver los productos en el carrito
 const viewCart = async (req, res) => {
   const { cartId } = req.params;
   

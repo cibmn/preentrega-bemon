@@ -4,7 +4,6 @@ import productController from '../controllers/productController.js';
 
 const router = Router();
 
-// Ruta para crear un producto (solo admin puede)
 router.post(
   "/",
   isAuth, 
@@ -12,7 +11,6 @@ router.post(
   productController.createProduct 
 );
 
-// Ruta para actualizar un producto (solo admin puede)
 router.patch(
   "/:id",
   isAuth, 
@@ -20,7 +18,6 @@ router.patch(
   productController.updateProduct 
 );
 
-// Ruta para eliminar un producto (solo admin puede)
 router.delete(
   "/:id",
   isAuth, 
@@ -28,7 +25,6 @@ router.delete(
   productController.deleteProduct 
 );
 
-// Ruta para listar productos (todos pueden ver)
 router.get("/", productController.listProducts);
 
 export default router;

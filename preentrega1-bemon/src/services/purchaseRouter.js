@@ -10,7 +10,6 @@ class PurchaseService {
   }
 
   async purchaseCart(userId, cartId) {
-    // Obtener el carrito del usuario
     const cart = await this.cartService.getCartByUserId(userId);
 
     if (!cart || cart.id !== cartId || cart.products.length === 0) {
@@ -18,7 +17,6 @@ class PurchaseService {
     }
 
     let totalAmount = 0;
-    // Validar el stock de los productos en el carrito
     for (const item of cart.products) {
       const product = await this.productService.getProductById(item.product);
 
@@ -26,11 +24,10 @@ class PurchaseService {
         throw new Error(`Stock insuficiente para el producto: ${product.name}`);
       }
       totalAmount += product.price * item.quantity;
-      product.stock -= item.quantity; // Reducir el stock
-      await product.save(); // Guardar el producto con el stock actualizado
+      product.stock -= item.quantity; 
+      await product.save(); 
     }
 
-    // Crear un ticket con la información de la compra
     const newTicket = new Ticket({
       code: `TICKET-${Date.now()}`,
       amount: totalAmount,
@@ -38,12 +35,11 @@ class PurchaseService {
       products: cart.products,
     });
 
-    await newTicket.save(); // Guardar el ticket en la base de datos
+    await newTicket.save(); 
 
-    // Aquí podrías, por ejemplo, vaciar el carrito del usuario
     await this.cartService.deleteAllProducts(cartId);
 
-    return newTicket; // Retornar el ticket generado
+    return newTicket; 
   }
 }
 

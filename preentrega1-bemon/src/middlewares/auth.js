@@ -5,7 +5,7 @@ export const isAuth = (req, res, next) => {
     .json({ status: "error", message: "No estás autenticado" });
 };
 
-// Middleware genérico para autorizar roles específicos (admin, user, etc.)
+
 export const authRole = (roles) => (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ status: "error", message: "No autenticado" });

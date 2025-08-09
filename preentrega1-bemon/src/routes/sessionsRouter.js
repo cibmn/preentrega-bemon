@@ -1,16 +1,15 @@
-// src/routes/sessionsRouter.js
 import { Router } from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 
 import cartDBManager from '../dao/cartDBManager.js';
-import { productDBManager } from '../dao/productDBManager.js';  // Importá la clase productDBManager
+import { productDBManager } from '../dao/productDBManager.js';  
 import userService from '../dao/userService.js';
 
 const router = Router();
 
-const productService = new productDBManager();    // Instancia productDBManager
-const cartService = new cartDBManager(productService); // Instancia cartDBManager con productService
+const productService = new productDBManager();    
+const cartService = new cartDBManager(productService); 
 
 router.post('/register', (req, res, next) => {
   passport.authenticate('register', async (err, user, info) => {
@@ -18,10 +17,8 @@ router.post('/register', (req, res, next) => {
       if (err) return res.status(500).send({ status: 'error', message: err.message });
       if (!user) return res.status(400).send({ status: 'error', message: info.message });
 
-      // Crear carrito para el usuario usando la instancia
       const cart = await cartService.createCart(user._id);
 
-      // Guardar el ID del carrito en el usuario (se asume userService tiene updateUser)
       user.cartId = cart.id;
       await userService.updateUser(user._id, { cartId: cart.id });
 
@@ -49,11 +46,9 @@ router.post('/login', (req, res, next) => {
       req.login(user, { session: false }, async (err) => {
         if (err) return res.status(500).send({ status: 'error', message: err.message });
 
-        // Obtener carrito asociado al usuario usando la instancia
         let cart = await cartService.getCartByUserId(user._id);
         if (!cart) {
           cart = await cartService.createCart(user._id);
-          // Actualizar usuario con nuevo carrito si no tenía
           await userService.updateUser(user._id, { cartId: cart.id });
         }
 

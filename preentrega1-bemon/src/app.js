@@ -54,12 +54,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// Rutas
 app.use('/api/products', productRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/', viewsRouter);
 
-// Rutas protegidas con JWT
 app.use('/api/carts', jwtAuth, cartRouter);
 app.use('/api/tickets', jwtAuth, ticketRouter);
 
