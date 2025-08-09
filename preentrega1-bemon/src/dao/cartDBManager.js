@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'; 
 import { productDBManager } from './productDBManager.js';
 
 class cartDBManager {
@@ -55,25 +56,24 @@ class cartDBManager {
     return cart;
   }
 
-async removeProductQuantity(cartId, productId, quantity) {
-  const cart = this.carts.find(c => c.id === cartId);
-  if (!cart) throw new Error('Carrito no encontrado');
+  async removeProductQuantity(cartId, productId, quantity) {
+    const cart = this.carts.find(c => c.id === cartId);
+    if (!cart) throw new Error('Carrito no encontrado');
 
-  const productInCart = cart.products.find(p => p.productId === productId);
-  if (!productInCart) throw new Error('Producto no encontrado en carrito');
+    const productInCart = cart.products.find(p => p.productId === productId);
+    if (!productInCart) throw new Error('Producto no encontrado en carrito');
 
-  if (quantity < 1) throw new Error('La cantidad debe ser al menos 1');
+    if (quantity < 1) throw new Error('La cantidad debe ser al menos 1');
 
-  productInCart.quantity -= quantity;
+    productInCart.quantity -= quantity;
 
-  if (productInCart.quantity <= 0) {
-    // eliminar producto del carrito
-    cart.products = cart.products.filter(p => p.productId !== productId);
+    if (productInCart.quantity <= 0) {
+      // eliminar producto del carrito
+      cart.products = cart.products.filter(p => p.productId !== productId);
+    }
+
+    return cart;
   }
-
-  return cart;
-}
-
 
   async updateProductByID(cartId, productId, quantity) {
     const cart = this.carts.find(c => c.id === cartId);
