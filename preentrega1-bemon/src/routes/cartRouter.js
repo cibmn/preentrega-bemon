@@ -4,7 +4,9 @@ import { productDBManager } from '../dao/productDBManager.js';
 import { jwtAuth } from '../middlewares/jwtAuth.js';
 import UserDTO from '../dtos/UserDTO.js';
 import CartDTO from '../dtos/CartDTO.js';
-import { currentUserDTO } from '../dtos/currentDTO.js';  // si usás esta versión
+import { currentUserDTO } from '../dtos/currentDTO.js';
+import { isAuth, authRole } from '../middlewares/roleAuth.js';
+
 
 const router = Router();
 const ProductService = new productDBManager();
@@ -62,7 +64,6 @@ router.post('/:cid/product/:pid', jwtAuth, async (req, res) => {
   }
 });
 
-
 // Eliminar producto del carrito
 router.delete('/:cid/product/:pid', jwtAuth, async (req, res) => {
   try {
@@ -103,7 +104,6 @@ router.patch('/:cid/product/:pid', jwtAuth, async (req, res) => {
     res.status(400).send({ status: 'error', message: error.message });
   }
 });
-
 
 // Vaciar carrito completo
 router.delete('/:cid', jwtAuth, async (req, res) => {
