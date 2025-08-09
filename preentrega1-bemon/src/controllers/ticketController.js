@@ -1,46 +1,41 @@
-import Ticket from '../models/ticketModel.js';
-import { productDBManager } from '../dao/productDBManager.js';
-import cartDBManager from '../dao/cartDBManager.js';
+import { productDBManager } from "../dao/productDBManager.js";  // Importa correctamente el productDBManager
+import TicketDBManager from "../dao/ticketDBManager.js";
 
-const ProductService = new productDBManager();
-const CartService = new cartDBManager(ProductService);
+// Crea una instancia de productDBManager
+const productService = new productDBManager();
 
-const createTicket = async (userId, cartId) => {
-  const cart = await CartService.getCartByUserId(userId);
-  if (!cart || cart.id !== cartId) {
-    throw new Error('Carrito no encontrado o no autorizado.');
+// Crea una instancia de ticketDBManager pasando el productService
+const ticketDBManager = new TicketDBManager(productService);  // Pasa el productService al constructor de TicketDBManager
+
+export const createTicket = async (req, res) => {
+  try {
+    const userId = req.user._id || req.user.id;
+    const { items, paymentMethod } = req.body;
+
+    // Crear el ticket
+    const newTicket = await ticketDBManager.createTicket(userId, items, paymentMethod);
+
+    res.status(201).send({
+      status: 'success',
+      message: 'Ticket creado exitosamente',
+      ticket: newTicket,
+    });
+  } catch (error) {
+    res.status(500).send({ status: 'error', message: error.message });
   }
-
-  for (const item of cart.products) {
-    const product = await ProductService.getProductByID(item.productId);
-    if (product.stock < item.quantity) {
-      throw new Error(`No hay suficiente stock para el producto ${product.title}`);
-    }
-  }
-
-  const ticket = new Ticket({
-    userId,
-    products: cart.products.map(item => ({
-      productId: item.productId,
-      quantity: item.quantity,
-      price: item.price
-    })),
-    totalPrice: cart.products.reduce((total, item) => total + (item.price * item.quantity), 0)
-  });
-
-  await ticket.save();
-
-  for (const item of cart.products) {
-    const product = await ProductService.getProductByID(item.productId);
-    product.stock -= item.quantity;
-    await product.save();
-  }
-
-  await CartService.deleteAllProducts(cart.id);
-
-  return ticket;
 };
 
-export default {
-  createTicket
+export const getUserTickets = async (req, res) => {
+  try {
+    const userId = req.user._id || req.user.id;
+    const tickets = await ticketDBManager.getTicketsByUserId(userId);
+    
+    if (!tickets.length) {
+      return res.status(404).send({ status: 'error', message: 'No se encontraron tickets' });
+    }
+
+    res.send({ status: 'success', payload: tickets });
+  } catch (error) {
+    res.status(500).send({ status: 'error', message: error.message });
+  }
 };
